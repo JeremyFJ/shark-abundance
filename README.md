@@ -5,18 +5,18 @@ This repository contains data mining and predictive modeling work using iNatural
 ## Reports
 
 #### Context
-Sharks remain one of the most vulnerable and exploited groups of large marine animals on the planet, largely due to knowledge gaps in their population ecology. To empower conservation, we can utilize untapped resources for reconstructing population trends. Social networks contain vast amounts of observations of sharks in the wild. Here, we use iNaturalist to source shark sightings, develop proxies of effort, and predict time series of relative abundance indices.
+Sharks remain one of the most vulnerable and exploited groups of large marine animals on the planet and it is largely due to knowledge gaps in their population ecology. To empower conservation, we can utilize untapped resources for reconstructing population trends. Social Networks contain vast amounts of observations of sharks in the wild. Here, we use iNaturalist to source shark sightings, develop proxies of effort, and predict time series of relative abundance indices.
 
 #### Model Rationale
 We sourced opportunistic shark sightings uploaded by iNaturalist users in two representative regions that are highly trafficked for tourism, underwater photography, and are popular among social media: Hawaii and the Bahamas. To develop abundance indices, we used the entire presence of iNaturalist users in the respective regions as a proxy for observation effort.
 
-The biases concerning this data are popular among most social network platforms. Without surveying users, we cannot gauge their affinity to capture shark presence as opposed to other wildlife, which is important for weighting effort. Second, the opportunistic nature of this data means absences cannot be trusted and therefore only if a shark was observed, the data is approximately correct. And third, we assumed that if a user observed a shark, subsequent non-shark observations are not considered shark absences and instead absences are grouped by trips in temporal bins. Ideally, the resolution of these trips would be daily, but given the sparseness of the data, we used monthly. Additionally, iNaturalist tags observations with three categories of validity in a field called `quality_grade`: `"research" "needs_id" "casual"`. We only sourced research-grade observations that have been validated by at least two people and do not contain identification disagreements. There is also a field that designates observations from aquariums or non-wild enclosures `captive_cultivated`, and so we only selected wild observations.
+The biases concerning this data are popular among most social network platforms. Without surveying users, we cannot gauge their affinity to capture shark presence as opposed to other wildlife, which is important for weighting effort. Second, the opportunistic nature of this data means absences cannot be trusted and therefor only if a shark was observed, the data is approximately correct. And third, we assumed that if a user observed a shark, subsequent non-shark observations are not considered shark absences and instead absences are grouped by trips in temporal bins. Ideally, the resolution of these trips would be daily, but given the sparseness of the data, we used monthly. Additionally, iNaturalist tags observations with three categories of validity in a field called `quality_grade`: `"research" "needs_id" "casual"`. We only sourced research-grade observations that have been validated by at least two people and do not contain identification disagreements. There is also a field that designates observations from aquariums or non-wild enclosures `captive_cultivated`, and so we only selected wild observations.
 
-We based our modeling methods on the Baum et al., 2003 report to predict abundance trends of various Northwest Atlantic shark populations. They used Generalized Linear Models (GLMs) with zero-truncated negative binomial distribution to account for unreporting in pelagic longline logbook data. We adopted this method here because our data likewise represents unreported and sparse shark sightings.
+We based our modeling methods on the Baum et al., 2003 report to predict abundance trends of various Northwest Atlantic shark populations. They used Generalized Linear Models (GLMs) with zero-truncated negative binomial distribution to account for unreporting in pelagic longline logbook data. We adopted this method here because our data likewise represents unreported and sparse shark sightings. 
 
 #### The Data
 
-Dates: 1983 - 2024
+Dates: 1983 - 2024\
 *Regions*: 
 Bahamas [19.7121, -80.0365, 27.3775, -69.7489] 
 - Shark observations: 592
@@ -28,42 +28,14 @@ Hawaii [16.5, -179.5, 29.5, -152.5]
 - Shark species: 12
 
 #### The Model
-We used a zero-truncated negative binomial generalized linear model (ZTNB GLM) where shark observations are greater than 0:
-
-<div align="center">
-\[
-\text{shark\_observations} \sim \text{year\_observed} + \text{latitude\_bin} \times \text{longitude\_bin} + \text{offset}(\log(\text{effort}))
-\]
-</div>
-
-The model is formulated to predict shark sightings based on year, location, and observation effort. The offset term accounts for variations in effort among different observations.
-
-For a regional trend, we estimated the number of shark sightings, grouped by year, and then averaged predicted shark sightings and observed effort. Then we standardized Sightings Per Unit Effort (SPUE) time series for area and year, and offset log effort to account for the bias of users' exposure to observe sharks. We scaled and transformed this relative abundance prediction as follows:
-
-<div align="center">
-\[
-\text{SPUE} = \log(100 \times \frac{\text{predicted\_shark\_observations}}{\text{total\_observations}})
-\]
-</div>
-
-We then created 95% confidence intervals for these predictions. The initial relative abundance was set to 1 for comparison among species-specific trends.
-
-#### Negative Binomial Distribution
-The probability mass function of a negative binomial distribution is given by:
-
-<div align="center">
-\[
-P(Y = k) = \binom{k + r - 1}{k} (1 - p)^r p^k
-\]
-</div>
-
-where:
-- \( k \) is the number of successes,
-- \( r \) is the number of failures until the experiment is stopped,
-- \( p \) is the probability of success on an individual trial.
+- NBGLM where shark_observations > 0
+```
+shark_observations ~ year_observed + latitude_bin * longitude_bin + offset(log_effort)
+```
+For a regional trend, we estimated the number of shark sightings, grouped by year, and then averaged predicted shark sightings and observed effort. Then we standardized Sightings Per Unit Effort (SPUE) time series for area and year, and offset log effort to account for the bias of users' exposure to observe sharks. We scaled and transformed this relative abundance prediction `log(100x)` and then created 95% confidence intervals. Then, we set the initial relative abundance to 1 for comparison among species-specific trends.
 
 #### To Consider 
-- A common phenomenon among social networks is `submission fatigue` where the average number of submissions from the same user will decline with enthusiasm to use the app. How can this phenomenon be accounted for in the shark observations and the effort?
+- A common phenomenon among social networks is `submission fatigue` where the average number of submissions coming from the same user will decline with enthusiasm to use the app. How can this phenomenon be accounted for in the shark observations and the effort?
 
 ### Hawaii Species Relative Abundance
 
@@ -93,9 +65,9 @@ To replicate the analysis, follow these steps:
     git clone https://github.com/yourusername/shark-abundance.git
     cd shark-abundance
     ```
-2. Source iNaturalist with the `rinat` package and `inat_cron.R` 
+2. Source iNaturalist with `rinat` package and `inat_cron.R` 
 
-3. Run `inat_species.R` to organize data, create and implement the ZTNB model, and output reports
+3. Run `inat_species.R` to organize data, create and implement ZTNB model, and output reports
 
 ## License
 
