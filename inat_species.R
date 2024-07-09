@@ -11,9 +11,9 @@ source("../inat_exp.R")
 ########################################################################################################################
 # Subsetting Data
 ########################################################################################################################
-region = "Hawaii"
-bbox <- c(16.5, -179.5, 29.5, -152.5) # hawaii
-# bbox = c(19.7121, -80.0365, 27.3775, -69.7489) # bahamas
+region = "Bahamas"
+# bbox <- c(16.5, -179.5, 29.5, -152.5) # hawaii
+bbox = c(19.7121, -80.0365, 27.3775, -69.7489) # bahamas
 # Subset `inat_data` and `inat_effort` based on the bounding box and extract month and year
 inat_data_filtered <- inat_data %>%
   filter(latitude >= bbox[1], latitude <= bbox[3], longitude >= bbox[2], longitude <= bbox[4]) %>%
@@ -104,15 +104,11 @@ for (species in species_list) {
   combined_summary_filtered <- combined_summary %>%
     filter(shark_observations > 0)
   
-  # Fit a zero-truncated negative binomial model using VGAM with tryCatch
+  # Fit a zero-truncated negative binomial model using MASS with tryCatch
   zt_nb_model <- tryCatch(
     {
-      vglm(
-        shark_observations ~ year_observed + offset(log_non_shark) + 
-                              latitude_bin + longitude_bin,
-        family = posnegbinomial(),
-        data = combined_summary_filtered
-      )
+      MASS::glm.nb(shark_observations ~ year_observed + latitude_bin * longitude_bin + offset(log_effort), 
+                   data = combined_summary_filtered)
     },
     error = function(e) {
       message(paste("Error fitting model for species:", species, "\n", e))
@@ -121,24 +117,60 @@ for (species in species_list) {
   )
   
   if(is.null(zt_nb_model)) {next}
-  summary(zt_nb_model)
+  # print(species)
+  # print(summary(zt_nb_model))
+  # # Model summary and diagnostics
+  # observed_deviance <- sum(resid(zt_nb_model, type = "pearson")^2)
+  # df <- zt_nb_model$df.residual
+  # overdispersion_param <- observed_deviance / df
+  # print(overdispersion_param)  # Check overdispersion
+  
   # Predict and add predictions to the data frame
   combined_summary_filtered <- combined_summary_filtered %>%
     mutate(predicted_shark_observations = predict(zt_nb_model, type = "response"))
   
-  # Calculate SPUE and confidence intervals 
-  combined_summary_filtered <- combined_summary_filtered %>%
-    mutate(
-      spue_predicted = (100 * predicted_shark_observations / total_observations),
-      lower_ci = qpois(0.025, lambda = 100 * predicted_shark_observations) / total_observations,
-      upper_ci = qpois(0.975, lambda = 100 * predicted_shark_observations) / total_observations
+  # Group by year and calculate mean predicted SPUE and confidence intervals
+  combined_summary_yearly <- combined_summary_filtered %>%
+    group_by(year_observed) %>%
+    summarise(
+      mean_predicted_shark_observations = mean(predicted_shark_observations),
+      mean_total_observations = mean(total_observations)
     ) %>%
-    mutate(residuals = shark_observations - predicted_shark_observations)
+    mutate(
+      spue_predicted = (100 * mean_predicted_shark_observations / mean_total_observations),
+      lower_ci = qpois(0.025, lambda = 100 * mean_predicted_shark_observations) / mean_total_observations,
+      upper_ci = qpois(0.975, lambda = 100 * mean_predicted_shark_observations) / mean_total_observations
+    )
   
-  spue_trend_plot_black_axes <- ggplot(combined_summary_filtered, aes(x = year_observed)) +
+  # Calculate residuals
+  combined_summary_yearly <- combined_summary_yearly %>%
+    mutate(residuals = mean_predicted_shark_observations - (spue_predicted * mean_total_observations / 100))
+  
+  
+  # Create a list of values for the new row
+  new_row <- list(
+    year_observed = min(inat_data_filtered_species$year_observed) - 2,
+    mean_predicted_shark_observations = 1,
+    mean_total_observations = 1,
+    spue_predicted = exp(1),  # 100 * predicted_shark_observations / total_observations
+    lower_ci = exp(1),  # qpois(0.025, lambda = predicted_shark_observations) / total_observations
+    upper_ci = exp(1),  # qpois(0.975, lambda = predicted_shark_observations) / total_observations
+    residuals = 0  # shark_observations - predicted_shark_observations
+  )
+  
+  # Add the new row to the data frame
+  combined_summary_yearly <- combined_summary_yearly %>% 
+    add_row(!!!new_row)
+  
+  ind = nrow(combined_summary_yearly)
+  stt = data.frame(start_year = combined_summary_yearly$year_observed[ind], spue_predicted = 1)
+  
+  spue_trend_plot_black_axes <- ggplot(combined_summary_yearly, aes(x = year_observed)) +
     geom_point(aes(y = log(spue_predicted)), color = "red") +
-    geom_smooth(aes(y = log(spue_predicted)), method = "glm", color = "blue", se = FALSE) +
-    geom_errorbar(aes(ymin = log(lower_ci), ymax = log(upper_ci)), width = 0.2) +
+    geom_point(data=stt, aes(x = start_year, y = spue_predicted), color = "black", pch = 18, size = 3) +
+    geom_smooth(aes(y = log(spue_predicted)), method = "loess", 
+                color = "blue", se = FALSE, fullrange=TRUE, span = 1) +
+    geom_errorbar(aes(ymin = log(lower_ci), ymax = log(upper_ci)), width = 0) +
     labs(
       title = paste(species, "-", region, sep = " "),
       x = "Year",
