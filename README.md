@@ -18,8 +18,8 @@ The report for the relative abundance of shark species in the Bahamas can be fou
 
 ## Repository Structure
 
+- `./`: Contains the R scripts used for data processing and modeling.
 - `data/`: Contains the raw and processed data files.
-- `scripts/`: Contains the R scripts used for data processing and modeling.
 - `figures/`: Contains the generated reports and plots.
 - `README.md`: This file, providing an overview of the repository.
 
