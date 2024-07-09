@@ -36,13 +36,9 @@ To replicate the analysis, follow these steps:
     git clone https://github.com/yourusername/shark-abundance.git
     cd shark-abundance
     ```
+2. Source iNaturalist with `rinat` package and `inat_cron.R` 
 
-2. Install the necessary R packages:
-    ```r
-    install.packages(c("tidyverse", "lubridate", "VGAM", "ggplot2", "ggmap", "MASS", "viridis"))
-    ```
-
-3. Run the R scripts in the `scripts/` directory to process the data and generate the reports.
+3. Run `inat_species.R` to organize data, create and implement ZTNB model, and output reports
 
 ## License
 
