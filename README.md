@@ -1,10 +1,6 @@
 # Shark Species Relative Abundance Estimation
 
-This repository contains data mining and predictive modeling work using iNaturalist data to estimate the relative abundance of shark species in Hawaii and the Bahamas. The analysis employs zero-truncated negative binomial predictive modeling.
-
-## Summary
-
-This project involves data mining from iNaturalist and using zero-truncated negative binomial predictive modeling to estimate the relative abundance of various shark species. The main focus areas are Hawaii and the Bahamas.
+This repository contains data mining and predictive modeling work using iNaturalist data to estimate the relative abundance of various shark species in Hawaii and the Bahamas. The analysis employs zero-truncated negative binomial predictive modeling.
 
 ## Reports
 
