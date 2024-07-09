@@ -16,7 +16,7 @@ We based our modeling methods on the Baum et al., 2003 report to predict abundan
 
 #### The Data
 
-Dates: 1983 - 2024\
+Dates: 1983 - 2024
 *Regions*: 
 Bahamas [19.7121, -80.0365, 27.3775, -69.7489] 
 - Shark observations: 592
@@ -30,26 +30,32 @@ Hawaii [16.5, -179.5, 29.5, -152.5]
 #### The Model
 We used a zero-truncated negative binomial generalized linear model (ZTNB GLM) where shark observations are greater than 0:
 
-$$
+<div align="center">
+\[
 \text{shark\_observations} \sim \text{year\_observed} + \text{latitude\_bin} \times \text{longitude\_bin} + \text{offset}(\log(\text{effort}))
-$$
+\]
+</div>
 
 The model is formulated to predict shark sightings based on year, location, and observation effort. The offset term accounts for variations in effort among different observations.
 
 For a regional trend, we estimated the number of shark sightings, grouped by year, and then averaged predicted shark sightings and observed effort. Then we standardized Sightings Per Unit Effort (SPUE) time series for area and year, and offset log effort to account for the bias of users' exposure to observe sharks. We scaled and transformed this relative abundance prediction as follows:
 
-$$
+<div align="center">
+\[
 \text{SPUE} = \log(100 \times \frac{\text{predicted\_shark\_observations}}{\text{total\_observations}})
-$$
+\]
+</div>
 
 We then created 95% confidence intervals for these predictions. The initial relative abundance was set to 1 for comparison among species-specific trends.
 
 #### Negative Binomial Distribution
 The probability mass function of a negative binomial distribution is given by:
 
-$$
+<div align="center">
+\[
 P(Y = k) = \binom{k + r - 1}{k} (1 - p)^r p^k
-$$
+\]
+</div>
 
 where:
 - \( k \) is the number of successes,
