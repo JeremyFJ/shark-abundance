@@ -4,6 +4,18 @@ This repository contains data mining and predictive modeling work using iNatural
 
 ## Reports
 
+**Context**\\
+Sharks remain one of the most vulnerable and exploited groups of large marine animals on the planet and it is largely due to knowledge gaps in their population ecology. To empower conservation, we can utilize untapped resources for reconstructing population trends. Social Networks contain vast amounts of observations of sharks in the wild. Here, we use iNaturalist to source shark sightings, develop proxies of effort, and predict time series of relative abundance indices.
+
+**Model rationale**\\
+We sourced opportunistic shark sightings uploaded by iNaturalist users in two representative regions that are highly trafficked for tourism, underwater photography, and are popular among social media: Hawaii and the Bahamas. We used the entire presence of iNaturalist users in the respective regions as a proxy for observation effort.
+
+The biases concerning this data are popular among most social network platforms. First, there is no way to discern the level of effort at which users were targeting sharks and not other animals. This means that without surveying the users, we cannot gauge their affinity to capture shark presence as opposed to other wildlife, which is important for weighting effort. Second, the opportunistic nature of this data means absences cannot be trusted and therefor only if a shark was observed, the data is approximately correct.
+
+We based our modeling methods on the Baum et al., 2003 report to predict abundance trends of various Northwest Atlantic shark populations. Here, they used Generalized Linear Models (GLMs) with zero-truncated negative binomial distribution to account for unreporting in pelagic longline logbook data. We adopted this method here because our data likewise represents unreported and sparse shark sightings. 
+
+**The Data**
+
 ### Hawaii Species Relative Abundance
 
 The report for the relative abundance of shark species in Hawaii can be found in the following PDF:
