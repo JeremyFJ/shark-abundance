@@ -17,7 +17,8 @@ We based our modeling methods on the Baum et al., 2003 report to predict abundan
 #### The Data
 
 Dates: 1983 - 2024\
-Regions:\ 
+Regions:
+
 **Bahamas** [19.7121, -80.0365, 27.3775, -69.7489] 
 - Shark observations: 592
 - Non-shark observations: 24,015
