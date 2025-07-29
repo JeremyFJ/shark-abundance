@@ -4,9 +4,9 @@ library(MASS)  # For glm.nb
 library(rnaturalearth)
 library(sf)
 library(ggthemes)
-library(VGAM)  # For vglm
+library(VGAM)  # For vglm -- not working
 library(gridExtra)
-source("../inat_exp.R")
+source("./inat_exp.R")
 # load("./hawaii_inat.RData")
 ########################################################################################################################
 # Subsetting Data
@@ -105,6 +105,7 @@ for (species in species_list) {
     filter(shark_observations > 0)
   
   # Fit a zero-truncated negative binomial model using MASS with tryCatch
+  # tryCatch will run the code, and if there is an error, it will not stop the for loop and just continue
   zt_nb_model <- tryCatch(
     {
       MASS::glm.nb(shark_observations ~ year_observed + latitude_bin * longitude_bin + offset(log_effort), 
